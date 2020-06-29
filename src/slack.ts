@@ -21,6 +21,58 @@ export async function postBuildFailed(
   )
 }
 
+export async function postReadyToDeploy(
+  build: BuildAction,
+  imageName: string,
+  buildTime: string,
+  tags: string | undefined,
+): Promise<api.WebAPICallResult> {
+  const channel = process.env.SLACK_CONTAINERS_NOTIFICATION
+  return exports.postMessage(channel, buildMessageForDeploy(imageName, buildTime, tags, build.repository))
+}
+
+function buildMessageForDeploy(
+  imageName: string,
+  buildTime: string,
+  tags: string | undefined,
+  repo: string | undefined,
+) {
+  return `{
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "plain_text",
+          "text": "image-name: ${imageName} build-time: ${buildTime}\ntag: [${tags}] repo: ${repo}",
+          "emoji": true
+        }
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "plain_text",
+          "text": "デプロイしますか？",
+          "emoji": true
+        }
+      },
+      {
+        "type": "actions",
+        "elements": [
+          {
+            "type": "button",
+            "text": {
+              "type": "plain_text",
+              "text": "デプロイへ",
+              "emoji": true
+            },
+            "value": "click_me_123"
+          }
+        ]
+      }
+    ]
+  }`
+}
+
 export function failedAttachment(build: BuildAction): types.MessageAttachment {
   const repositoryBlock: types.SectionBlock = {
     type: 'section',

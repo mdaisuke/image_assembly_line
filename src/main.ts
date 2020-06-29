@@ -65,6 +65,8 @@ async function run(): Promise<void> {
         gitHubRunID: process.env.GITHUB_RUN_ID
       })
     }
+
+    notification.notifyReadyToDeploy(thisAction, imageName, "n min m sec", docker.builtImage?.tags.join(", "))
   } catch (e) {
     if (e instanceof BuildError) {
       core.error('image build error')
